@@ -1,12 +1,15 @@
 {
   "name": "dx-har-parser",
   "version": "1.0.0",
-  "description": "",
+  "description": "Parse HAR files from DX",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
-  "author": "",
-  "license": "MIT"
+  "author": "Cory Reed <swashcap@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "query-string": "^4.2.3"
+  }
 }
