@@ -4,16 +4,31 @@ const fs = require('fs');
 const queryString = require('query-string');
 const url = require('url');
 
-const URL_PATTERN = /devnode.mind.unm.edu\/(.*[^favicon])/;
-const RESPONSE_PATTERN = /^parent._jqjsp\((.*)'\)$/m;
+const URL_PATTERN = /devnode\.mind\.unm\.edu\//;
 
-fs.readFile(process.argv[2], (error, data) => {
-  if (error) {
-    console.error(error);
-  } else {
-    console.log(parseHar(JSON.parse(data.toString())));
+module.exports = {
+  readHar,
+};
+
+if (require.main === module) {
+  readHar(process.argv[2]).then(console.log, console.error);
+}
+
+function readHar(filePath) {
+  if (!filePath) {
+    return Promise.reject(new Error('File path required'));
   }
-});
+
+  return new Promise((resolve, reject) => {
+    fs.readFile(filePath, (error, data) => {
+      if (error) {
+        reject(error);
+      } else {
+        resolve(parseHar(JSON.parse(data.toString())));
+      }
+    });
+  });
+}
 
 function parseHar(har) {
   return har.log.entries.reduce((memo, { request, response }) => {
@@ -29,10 +44,15 @@ function parseHar(har) {
 
       // Parse the response's content as JSON
       if ('text' in response.content && response.content.text) {
-        responseData = JSON.parse(response.content.text.slice(
-          'parent._jqjsp(\\'.length, // trim from start
-          response.content.text.length - '\')'.length // trim from end 
-        ).replace(/\n/g, '\\n'));
+        try {
+          responseData = JSON.parse(response.content.text.slice(
+            'parent._jqjsp(\''.length, // trim from start
+            response.content.text.length - '\')'.length // trim from end 
+          ).replace(/\n/g, '\\n'));
+        } catch (error) {
+          debugger;
+          throw error;
+        }
       }
 
       return memo.concat({
